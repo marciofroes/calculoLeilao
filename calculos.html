@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Compra de Carro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Compra de Carro</h1>
+        <label for="valorCarro">Valor do Carro (R$):</label>
+        <input type="text" id="valorCarro" placeholder="Digite o valor do carro" required oninput="formatarMoeda(this)">
+
+        <label for="entradaPercentual">Percentual de Entrada (%):</label>
+        <input type="number" id="entradaPercentual" value="25" placeholder="Digite o percentual da entrada">
+
+        <label for="comissaoLeiloeiro">Comissão do Leiloeiro (%):</label>
+        <input type="number" id="comissaoLeiloeiro" value="5" placeholder="Digite a comissão do leiloeiro">
+
+        <label for="percentualCartaGarantia">Percentual da Carta de Garantia (%):</label>
+        <input type="number" id="percentualCartaGarantia" value="8.75" placeholder="Digite o percentual da carta de garantia">
+
+        <label for="numeroParcelas">Número de Parcelas:</label>
+        <input type="number" id="numeroParcelas" value="30" placeholder="Digite o número de parcelas">
+
+        <label for="taxaAnualCartaFianca">Taxa Anual da Carta Fiança (%):</label>
+        <input type="number" id="taxaAnualCartaFianca" value="3.5" placeholder="Digite a taxa anual da carta fiança">
+
+        <button onclick="calcularValores()">Calcular</button>
+
+        <div class="result" id="resultado"></div>
+    </div>
+
+    <script>
+        // Função para formatar o valor em reais conforme o usuário digita
+        function formatarMoeda(campo) {
+            let valor = campo.value.replace(/\D/g, ""); // Remove caracteres não numéricos
+            valor = (valor / 100).toFixed(2) + ""; // Divide por 100 para manter duas casas decimais
+            valor = valor.replace(".", ","); // Substitui ponto por vírgula
+            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."); // Adiciona ponto para separador de milhar
+            campo.value = "R$ " + valor; // Adiciona símbolo de reais
+        }
+
+        // Função para limpar o valor e remover o símbolo 'R$' antes de realizar os cálculos
+        function limparMoeda(valor) {
+            return parseFloat(valor.replace(/[R$\.,]/g, "")) / 100; // Remove caracteres e ajusta para número correto
+        }
+
+        function calcularValores() {
+            // Captura os valores dos inputs
+            const valorCarro = limparMoeda(document.getElementById('valorCarro').value);
+            const entradaPercentual = parseFloat(document.getElementById('entradaPercentual').value);
+            const comissaoLeiloeiro = parseFloat(document.getElementById('comissaoLeiloeiro').value);
+            const percentualCartaGarantia = parseFloat(document.getElementById('percentualCartaGarantia').value);
+            const numeroParcelas = parseInt(document.getElementById('numeroParcelas').value);
+            const taxaAnualCartaFianca = parseFloat(document.getElementById('taxaAnualCartaFianca').value);
+
+            // Cálculos
+            const entrada = (valorCarro * entradaPercentual) / 100;
+            const comissao = (valorCarro * comissaoLeiloeiro) / 100;
+            const cartaGarantia = (valorCarro * percentualCartaGarantia) / 100;
+            const saldo = valorCarro - entrada;
+            const valorParcela = saldo / numeroParcelas;
+            const custasIniciais = entrada + comissao + cartaGarantia;
+            const totalParcelas = valorParcela * numeroParcelas;
+
+            // Cálculo do custo total do carro (soma das parcelas, custas iniciais e carta garantia)
+            const custoTotal = custasIniciais + totalParcelas;
+
+            // Função de formatação para moeda (R$)
+            function formatarParaMoeda(valor) {
+                return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            }
+
+            // Exibe os resultados na página
+            document.getElementById('resultado').innerHTML = `
+                <h2>Resultados:</h2>
+                <p><strong>Arremate:</strong> ${formatarParaMoeda(valorCarro)}</p>
+                <p><strong>Comissão Leiloeiro:</strong> ${formatarParaMoeda(comissao)} (${comissaoLeiloeiro}%)</p>
+                <p><strong>Entrada:</strong> ${formatarParaMoeda(entrada)} (${entradaPercentual}%)</p>
+                <p><strong>Carta Garantia:</strong> ${formatarParaMoeda(cartaGarantia)} (${percentualCartaGarantia}%)</p>
+                <p><strong>Saldo:</strong> ${formatarParaMoeda(saldo)}</p>
+                <p><strong>Parcela:</strong> ${formatarParaMoeda(valorParcela)} (${numeroParcelas} parcelas)</p>
+                <p><strong>Custas Iniciais:</strong> ${formatarParaMoeda(custasIniciais)}</p>
+                <p><strong>Taxa Anual Carta Fiança:</strong> ${taxaAnualCartaFianca.toFixed(2)}%</p>
+                <p><strong>Custo Total do Carro:</strong> ${formatarParaMoeda(custoTotal)}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
